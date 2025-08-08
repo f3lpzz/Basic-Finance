@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase-mock';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -26,6 +26,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode, isSignUp }) 
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`
+          }
         });
         if (error) throw error;
         toast({

@@ -3,39 +3,57 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUpCircle, ArrowDownCircle, FileText, Trash2 } from 'lucide-react';
-
-// Mock data - will be replaced with real data from Supabase
-const mockTransactions = [
-  {
-    id: '1',
-    type: 'entrada',
-    amount: 5000.00,
-    description: 'Venda de produtos',
-    category: 'Vendas',
-    created_at: '2024-01-15',
-    receipt_url: null,
-  },
-  {
-    id: '2',
-    type: 'saida',
-    amount: 1200.00,
-    description: 'Compra de materiais',
-    category: 'Fornecedores',
-    created_at: '2024-01-14',
-    receipt_url: 'receipt-url',
-  },
-  {
-    id: '3',
-    type: 'entrada',
-    amount: 3500.00,
-    description: 'Serviços prestados',
-    category: 'Receita',
-    created_at: '2024-01-13',
-    receipt_url: null,
-  },
-];
+import { useTransactions } from '@/hooks/useTransactions';
+import { useToast } from '@/hooks/use-toast';
 
 export const TransactionList: React.FC = () => {
+  const { transactions, loading, deleteTransaction } = useTransactions();
+  const { toast } = useToast();
+
+  const handleDelete = async (id: string) => {
+    const result = await deleteTransaction(id);
+    if (result.success) {
+      toast({
+        title: "Transação removida",
+        description: "A transação foi removida com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Erro",
+        description: result.error || "Erro ao remover transação.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Últimas Transações</CardTitle>
+          <CardDescription>
+            Histórico das movimentações financeiras
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="h-5 w-5 bg-muted animate-pulse rounded-full" />
+                  <div>
+                    <div className="h-4 w-32 bg-muted animate-pulse rounded mb-2" />
+                    <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+                  </div>
+                </div>
+                <div className="h-6 w-20 bg-muted animate-pulse rounded" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <Card>
       <CardHeader>
@@ -46,14 +64,19 @@ export const TransactionList: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {mockTransactions.map((transaction) => (
+          {transactions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma transação encontrada. Adicione sua primeira transação!
+            </div>
+          ) : (
+            transactions.map((transaction) => (
             <div
               key={transaction.id}
               className="flex items-center justify-between p-4 border rounded-lg"
             >
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
-                  {transaction.type === 'entrada' ? (
+                  {transaction.type === 'income' ? (
                     <ArrowUpCircle className="h-5 w-5 text-green-600" />
                   ) : (
                     <ArrowDownCircle className="h-5 w-5 text-red-600" />
@@ -62,7 +85,7 @@ export const TransactionList: React.FC = () => {
                 <div>
                   <p className="font-medium">{transaction.description}</p>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <span>{transaction.category}</span>
+                    <span>{transaction.categories?.name || 'Sem categoria'}</span>
                     <span>•</span>
                     <span>{new Date(transaction.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
@@ -72,12 +95,12 @@ export const TransactionList: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <div className={`font-medium ${
-                    transaction.type === 'entrada' ? 'text-green-600' : 'text-red-600'
+                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {transaction.type === 'entrada' ? '+' : '-'}R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    {transaction.type === 'income' ? '+' : '-'}R$ {Number(transaction.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
-                  <Badge variant={transaction.type === 'entrada' ? 'default' : 'secondary'}>
-                    {transaction.type === 'entrada' ? 'Entrada' : 'Saída'}
+                  <Badge variant={transaction.type === 'income' ? 'default' : 'secondary'}>
+                    {transaction.type === 'income' ? 'Entrada' : 'Saída'}
                   </Badge>
                 </div>
                 
@@ -87,13 +110,19 @@ export const TransactionList: React.FC = () => {
                       <FileText className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" className="text-red-600">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600"
+                    onClick={() => handleDelete(transaction.id)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

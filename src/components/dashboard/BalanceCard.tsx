@@ -1,12 +1,31 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { useTransactions } from '@/hooks/useTransactions';
 
 export const BalanceCard: React.FC = () => {
-  // Mock data for now - will be replaced with real data from Supabase
-  const balance = 15420.50;
-  const totalEntradas = 25000.00;
-  const totalSaidas = 9579.50;
+  const { stats, loading } = useTransactions();
+  
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:col-span-2 lg:col-span-3">
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-6 w-32 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:col-span-2 lg:col-span-3">
@@ -18,7 +37,7 @@ export const BalanceCard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
               Saldo disponível em caixa
@@ -33,7 +52,7 @@ export const BalanceCard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              R$ {totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {stats.totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
               Total recebido este mês
@@ -48,7 +67,7 @@ export const BalanceCard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              R$ {totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {stats.totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
               Total gasto este mês

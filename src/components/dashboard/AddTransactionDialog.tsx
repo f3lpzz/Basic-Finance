@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Upload } from 'lucide-react';
+import { useTransactions } from '@/hooks/useTransactions';
+import { useCategories } from '@/hooks/useCategories';
+import { transactionSchema, fileSchema } from '@/lib/validations';
 
 interface AddTransactionDialogProps {
   open: boolean;
@@ -18,39 +21,78 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  const [type, setType] = useState<'entrada' | 'saida'>('entrada');
+  const [type, setType] = useState<'income' | 'expense'>('income');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [receipt, setReceipt] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  // Mock categories - will be replaced with real data from Supabase
-  const entradaCategories = ['Receita', 'Vendas', 'Investimentos'];
-  const saidaCategories = ['Despesas Gerais', 'Fornecedores', 'Salários', 'Marketing', 'Operacional'];
+  const { addTransaction } = useTransactions();
+  const { categories } = useCategories();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // TODO: Implement Supabase integration
-      toast({
-        title: "Transação adicionada!",
-        description: "A transação foi registrada com sucesso.",
+      // Validate file if present
+      if (receipt) {
+        const fileValidation = fileSchema.safeParse({
+          size: receipt.size,
+          type: receipt.type,
+        });
+        
+        if (!fileValidation.success) {
+          toast({
+            title: "Arquivo inválido",
+            description: fileValidation.error.issues[0].message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Validate form data
+      const validation = transactionSchema.safeParse({
+        type,
+        amount: parseFloat(amount),
+        description,
+        category_id: categoryId,
       });
+
+      if (!validation.success) {
+        toast({
+          title: "Dados inválidos",
+          description: validation.error.issues[0].message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const result = await addTransaction(validation.data);
       
-      // Reset form
-      setAmount('');
-      setDescription('');
-      setCategory('');
-      setReceipt(null);
-      onOpenChange(false);
+      if (result.success) {
+        toast({
+          title: "Transação adicionada!",
+          description: "A transação foi registrada com sucesso.",
+        });
+        
+        // Reset form
+        setAmount('');
+        setDescription('');
+        setCategoryId('');
+        setReceipt(null);
+        onOpenChange(false);
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Erro ao adicionar transação. Tente novamente.",
+        description: error.message || "Erro ao adicionar transação. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -81,18 +123,18 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
             <RadioGroup
               value={type}
               onValueChange={(value) => {
-                setType(value as 'entrada' | 'saida');
-                setCategory(''); // Reset category when type changes
+                setType(value as 'income' | 'expense');
+                setCategoryId(''); // Reset category when type changes
               }}
               className="flex space-x-6"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="entrada" id="entrada" />
-                <Label htmlFor="entrada" className="text-green-600">Entrada</Label>
+                <RadioGroupItem value="income" id="income" />
+                <Label htmlFor="income" className="text-green-600">Entrada</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="saida" id="saida" />
-                <Label htmlFor="saida" className="text-red-600">Saída</Label>
+                <RadioGroupItem value="expense" id="expense" />
+                <Label htmlFor="expense" className="text-red-600">Saída</Label>
               </div>
             </RadioGroup>
           </div>
@@ -123,14 +165,14 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="category">Categoria</Label>
-            <Select value={category} onValueChange={setCategory} required>
+            <Select value={categoryId} onValueChange={setCategoryId} required>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
-                {(type === 'entrada' ? entradaCategories : saidaCategories).map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>

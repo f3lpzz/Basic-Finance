@@ -3,29 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpCircle, ArrowDownCircle, FileText, DollarSign, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { useTransactions } from '@/hooks/useTransactions';
-import { Navigate } from 'react-router-dom';
+import { usePublicTransactions } from '@/hooks/usePublicTransactions';
 
 const Transparencia = () => {
-  const { session, loading: authLoading } = useAuth();
-  const { transactions, stats, loading } = useTransactions();
-
-  // Require authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return <Navigate to="/" replace />;
-  }
+  const { transactions, stats, loading } = usePublicTransactions();
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,10 +26,10 @@ const Transparencia = () => {
           <div className="text-center">
             <h1 className="text-3xl font-bold">Portal da Transparência</h1>
             <p className="text-lg text-muted-foreground mt-2">
-              Dados Financiais Pessoais
+              Dados Financeiros Públicos
             </p>
             <p className="text-sm text-muted-foreground">
-              Acompanhe suas movimentações financeiras em tempo real
+              Transparência completa de todas as movimentações financeiras
             </p>
           </div>
         </div>
@@ -125,7 +106,7 @@ const Transparencia = () => {
           <CardHeader>
             <CardTitle>Movimentações Financeiras</CardTitle>
             <CardDescription>
-              Histórico completo de todas as transações
+              Histórico completo de todas as transações públicas
             </CardDescription>
           </CardHeader>
           <CardContent>

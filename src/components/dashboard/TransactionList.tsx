@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUpCircle, ArrowDownCircle, FileText, Trash2 } from 'lucide-react';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 export const TransactionList: React.FC = () => {
   const { transactions, loading, deleteTransaction } = useTransactions();
   const { toast } = useToast();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selected, setSelected] = useState<(typeof transactions)[number] | null>(null);
 
   const handleDelete = async (id: string) => {
     const result = await deleteTransaction(id);
@@ -55,11 +57,12 @@ export const TransactionList: React.FC = () => {
     );
   }
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Últimas Transações</CardTitle>
-        <CardDescription>
-          Histórico das movimentações financeiras
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Últimas Transações</CardTitle>
+          <CardDescription>
+            Histórico das movimentações financeiras
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -72,7 +75,8 @@ export const TransactionList: React.FC = () => {
             transactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer"
+              onClick={() => { setSelected(transaction); setDetailsOpen(true); }}
             >
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
@@ -82,14 +86,14 @@ export const TransactionList: React.FC = () => {
                     <ArrowDownCircle className="h-5 w-5 text-red-600" />
                   )}
                 </div>
-                <Link to={`/transacao/${transaction.id}`} className="group">
+                <div className="group">
                   <p className="font-medium underline-offset-4 group-hover:underline">{transaction.description}</p>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <span>{transaction.categories?.name || 'Sem categoria'}</span>
                     <span>•</span>
                     <span>{new Date(transaction.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                </Link>
+                </div>
               </div>
               
               <div className="flex items-center space-x-4">
@@ -106,17 +110,20 @@ export const TransactionList: React.FC = () => {
                 
                 <div className="flex space-x-1">
                   {transaction.receipt_url && (
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/transacao/${transaction.id}`} aria-label="Ver detalhes e comprovante">
-                        <FileText className="h-4 w-4" />
-                      </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); setSelected(transaction); setDetailsOpen(true); }}
+                      aria-label="Ver detalhes e comprovante"
+                    >
+                      <FileText className="h-4 w-4" />
                     </Button>
                   )}
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     className="text-red-600"
-                    onClick={() => handleDelete(transaction.id)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(transaction.id); }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -128,5 +135,13 @@ export const TransactionList: React.FC = () => {
         </div>
       </CardContent>
     </Card>
-  );
+    {selected && (
+      <TransactionDetailsDialog
+        open={detailsOpen}
+        onOpenChange={(open) => { setDetailsOpen(open); if (!open) setSelected(null); }}
+        transaction={selected}
+      />
+    )}
+  </>
+);
 };

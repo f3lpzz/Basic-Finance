@@ -72,6 +72,19 @@ export const usePublicTransactions = () => {
     }
   };
 
+  // Realtime subscription to public transactions
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime-public-transactions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchPublicTransactions();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const calculateStats = (transactions: Transaction[]) => {
     const totalIncome = transactions
       .filter(t => t.type === 'income')

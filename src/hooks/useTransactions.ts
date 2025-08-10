@@ -42,6 +42,13 @@ export const useTransactions = () => {
     }
   }, [user]);
 
+  // Listen for local update events (e.g., after add/delete)
+  useEffect(() => {
+    const handler = () => fetchTransactions();
+    window.addEventListener('transactions:updated', handler);
+    return () => window.removeEventListener('transactions:updated', handler);
+  }, [user]);
+
   const fetchTransactions = async () => {
     try {
       setLoading(true);
@@ -70,6 +77,20 @@ export const useTransactions = () => {
       setLoading(false);
     }
   };
+
+  // Realtime subscription for transactions
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('realtime-transactions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchTransactions();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const calculateStats = (transactions: Transaction[]) => {
     const income = transactions
@@ -100,7 +121,8 @@ export const useTransactions = () => {
 
       if (error) throw error;
 
-      await fetchTransactions(); // Refresh data
+      await fetchTransactions();
+      window.dispatchEvent(new Event('transactions:updated')); // Notify other subscribers
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -120,7 +142,8 @@ export const useTransactions = () => {
 
       if (error) throw error;
 
-      await fetchTransactions(); // Refresh data
+      await fetchTransactions();
+      window.dispatchEvent(new Event('transactions:updated')); // Notify other subscribers
       return { success: true };
     } catch (err: any) {
       setError(err.message);

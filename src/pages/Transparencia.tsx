@@ -12,17 +12,6 @@ const Transparencia = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.history.back()}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-          </div>
           <div className="text-center">
             <h1 className="text-3xl font-bold">Portal da Transparência</h1>
             <p className="text-lg text-muted-foreground mt-2">

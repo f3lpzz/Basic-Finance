@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpCircle, ArrowDownCircle, FileText, Trash2 } from 'lucide-react';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useToast } from '@/hooks/use-toast';
-
+import { Link } from 'react-router-dom';
 export const TransactionList: React.FC = () => {
   const { transactions, loading, deleteTransaction } = useTransactions();
   const { toast } = useToast();
@@ -82,14 +82,14 @@ export const TransactionList: React.FC = () => {
                     <ArrowDownCircle className="h-5 w-5 text-red-600" />
                   )}
                 </div>
-                <div>
-                  <p className="font-medium">{transaction.description}</p>
+                <Link to={`/transacao/${transaction.id}`} className="group">
+                  <p className="font-medium underline-offset-4 group-hover:underline">{transaction.description}</p>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <span>{transaction.categories?.name || 'Sem categoria'}</span>
                     <span>•</span>
                     <span>{new Date(transaction.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                </div>
+                </Link>
               </div>
               
               <div className="flex items-center space-x-4">
@@ -106,8 +106,10 @@ export const TransactionList: React.FC = () => {
                 
                 <div className="flex space-x-1">
                   {transaction.receipt_url && (
-                    <Button variant="ghost" size="sm">
-                      <FileText className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to={`/transacao/${transaction.id}`} aria-label="Ver detalhes e comprovante">
+                        <FileText className="h-4 w-4" />
+                      </Link>
                     </Button>
                   )}
                   <Button 

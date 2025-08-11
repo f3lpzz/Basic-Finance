@@ -89,7 +89,14 @@ export const TransactionList: React.FC = () => {
                 <div className="group">
                   <p className="font-medium underline-offset-4 group-hover:underline">{transaction.description}</p>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <span>{transaction.categories?.name || 'Sem categoria'}</span>
+                    <span className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="h-2 w-2 rounded-full border border-input"
+                        style={{ backgroundColor: transaction.categories?.color || 'transparent' }}
+                      />
+                      <span>{transaction.categories?.name || 'Sem categoria'}</span>
+                    </span>
                     <span>•</span>
                     <span>{new Date(transaction.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>

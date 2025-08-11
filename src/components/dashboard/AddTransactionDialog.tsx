@@ -72,7 +72,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
         return;
       }
 
-      const result = await addTransaction(validation.data);
+      const result = await addTransaction(validation.data, receipt || undefined);
       
       if (result.success) {
         toast({

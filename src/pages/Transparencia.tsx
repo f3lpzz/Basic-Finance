@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpCircle, ArrowDownCircle, FileText, DollarSign, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePublicTransactions } from '@/hooks/usePublicTransactions';
+import { TransactionDetailsDialog } from '@/components/dashboard/TransactionDetailsDialog';
 
 const Transparencia = () => {
   const { transactions, stats, loading } = usePublicTransactions();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selected, setSelected] = useState<(typeof transactions)[number] | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,7 +126,8 @@ const Transparencia = () => {
                 {transactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer"
+                    onClick={() => { setSelected(transaction); setDetailsOpen(true); }}
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
@@ -133,8 +137,8 @@ const Transparencia = () => {
                           <ArrowDownCircle className="h-5 w-5 text-red-600" />
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium">{transaction.description}</p>
+                      <div className="group">
+                        <p className="font-medium underline-offset-4 group-hover:underline">{transaction.description}</p>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <span>{transaction.categories?.name || 'Sem categoria'}</span>
                           <span>•</span>
@@ -155,9 +159,18 @@ const Transparencia = () => {
                         </Badge>
                       </div>
                       
-                      {transaction.receipt_url && (
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                      )}
+                      <div className="flex space-x-1">
+                        {transaction.receipt_url && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setSelected(transaction); setDetailsOpen(true); }}
+                            aria-label="Ver detalhes e comprovante"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -173,6 +186,14 @@ const Transparencia = () => {
           </p>
         </footer>
       </main>
+      
+      {selected && (
+        <TransactionDetailsDialog
+          open={detailsOpen}
+          onOpenChange={(open) => { setDetailsOpen(open); if (!open) setSelected(null); }}
+          transaction={selected}
+        />
+      )}
     </div>
   );
 };

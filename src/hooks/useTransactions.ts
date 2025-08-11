@@ -108,15 +108,37 @@ export const useTransactions = () => {
     });
   };
 
-  const addTransaction = async (data: TransactionInput) => {
+  const addTransaction = async (data: TransactionInput, file?: File) => {
     try {
       setError(null);
+
+      let receipt_url = null;
+
+      // Upload file if provided
+      if (file && user) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('receipts')
+          .getPublicUrl(fileName);
+
+        receipt_url = urlData.publicUrl;
+      }
 
       const { error } = await supabase
         .from('transactions')
         .insert([{
           ...data,
           user_id: user?.id,
+          receipt_url,
         }]);
 
       if (error) throw error;

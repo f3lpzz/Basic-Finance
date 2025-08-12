@@ -25,7 +25,12 @@ interface TransactionStats {
   totalExpenses: number;
 }
 
-export const useTransactions = () => {
+interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+export const useTransactions = (dateRange?: DateRange) => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats>({
@@ -40,7 +45,7 @@ export const useTransactions = () => {
     if (user) {
       fetchTransactions();
     }
-  }, [user]);
+  }, [user, dateRange]);
 
   // Listen for local update events (e.g., after add/delete)
   useEffect(() => {
@@ -54,7 +59,7 @@ export const useTransactions = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select(`
           *,
@@ -62,8 +67,19 @@ export const useTransactions = () => {
             name,
             color
           )
-        `)
-        .order('created_at', { ascending: false });
+        `);
+
+      // Apply date range filter if provided
+      if (dateRange?.from) {
+        query = query.gte('created_at', dateRange.from.toISOString());
+      }
+      if (dateRange?.to) {
+        const endOfDay = new Date(dateRange.to);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.lte('created_at', endOfDay.toISOString());
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
 

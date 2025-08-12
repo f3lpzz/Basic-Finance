@@ -5,6 +5,7 @@ export const transactionSchema = z.object({
   amount: z.number().positive('Valor deve ser maior que zero'),
   description: z.string().min(1, 'Descrição não pode estar vazia').max(500, 'Descrição muito longa'),
   category_id: z.string().uuid('Categoria inválida'),
+  created_at: z.string().optional(),
 });
 
 export const profileSchema = z.object({

@@ -6,8 +6,15 @@ import { ArrowUpCircle, ArrowDownCircle, FileText, Trash2 } from 'lucide-react';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useToast } from '@/hooks/use-toast';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
+import { DateRangeFilter } from './DateRangeFilter';
+interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
 export const TransactionList: React.FC = () => {
-  const { transactions, loading, deleteTransaction } = useTransactions();
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const { transactions, loading, deleteTransaction } = useTransactions(dateRange);
   const { toast } = useToast();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selected, setSelected] = useState<(typeof transactions)[number] | null>(null);
@@ -60,11 +67,16 @@ export const TransactionList: React.FC = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Últimas Transações</CardTitle>
-          <CardDescription>
-            Histórico das movimentações financeiras
-        </CardDescription>
-      </CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Últimas Transações</CardTitle>
+              <CardDescription>
+                Histórico das movimentações financeiras
+              </CardDescription>
+            </div>
+            <DateRangeFilter onDateRangeChange={setDateRange} />
+          </div>
+        </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {transactions.length === 0 ? (

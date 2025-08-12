@@ -6,11 +6,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
-import { Upload } from 'lucide-react';
+import { Upload, CalendarIcon } from 'lucide-react';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useCategories } from '@/hooks/useCategories';
 import { transactionSchema, fileSchema } from '@/lib/validations';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface AddTransactionDialogProps {
   open: boolean;
@@ -26,6 +31,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [transactionDate, setTransactionDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { addTransaction } = useTransactions();
@@ -72,6 +78,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
         amount: parseFloat(amount),
         description,
         category_id: categoryId,
+        created_at: transactionDate.toISOString(),
       });
 
       if (!validation.success) {
@@ -97,6 +104,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
         setDescription('');
         setCategoryId('');
         setReceipt(null);
+        setTransactionDate(new Date());
         onOpenChange(false);
       } else {
         throw new Error(result.error);
@@ -189,6 +197,34 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Data da Transação</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !transactionDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {transactionDate ? format(transactionDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione a data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={transactionDate}
+                  onSelect={(date) => date && setTransactionDate(date)}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">

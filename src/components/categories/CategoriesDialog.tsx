@@ -64,6 +64,7 @@ export const CategoriesDialog: React.FC<CategoriesDialogProps> = ({ open, onOpen
       if (error) throw error;
       await refetch();
       window.dispatchEvent(new Event("transactions:updated"));
+      window.dispatchEvent(new Event("categories:updated"));
       setNewName("");
       setNewColor("#3b82f6");
       toast({ title: "Categoria criada", description: "Sua categoria foi adicionada." });
@@ -100,6 +101,7 @@ export const CategoriesDialog: React.FC<CategoriesDialogProps> = ({ open, onOpen
       if (error) throw error;
       await refetch();
       window.dispatchEvent(new Event("transactions:updated"));
+      window.dispatchEvent(new Event("categories:updated"));
       setEditingId(null);
       toast({ title: "Categoria atualizada", description: "Alterações salvas com sucesso." });
     } catch (err: any) {
@@ -127,6 +129,7 @@ export const CategoriesDialog: React.FC<CategoriesDialogProps> = ({ open, onOpen
       if (error) throw error;
       await refetch();
       window.dispatchEvent(new Event("transactions:updated"));
+      window.dispatchEvent(new Event("categories:updated"));
       toast({ title: "Categoria excluída", description: "A categoria foi removida." });
     } catch (err: any) {
       toast({ title: "Erro", description: err?.message || "Erro ao excluir categoria", variant: "destructive" });
@@ -148,20 +151,26 @@ export const CategoriesDialog: React.FC<CategoriesDialogProps> = ({ open, onOpen
           {/* Create */}
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                <div className="md:col-span-2 space-y-2">
+              <div className="space-y-4">
+                <div className="space-y-2">
                   <Label htmlFor="newName">Nome da categoria</Label>
                   <Input id="newName" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex.: Alimentação" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="newColor">Cor</Label>
-                  <div className="flex items-center gap-2">
-                    <input id="newColor" type="color" value={newColor} onChange={(e) => setNewColor(e.target.value)} className="h-10 w-10 rounded-md border border-input" />
-                    <Button type="button" className="flex-1" onClick={handleCreate} disabled={creating}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar
-                    </Button>
+                <div className="flex items-end gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="newColor">Cor</Label>
+                    <input 
+                      id="newColor" 
+                      type="color" 
+                      value={newColor} 
+                      onChange={(e) => setNewColor(e.target.value)} 
+                      className="h-10 w-12 rounded-md border border-input cursor-pointer" 
+                    />
                   </div>
+                  <Button type="button" onClick={handleCreate} disabled={creating} className="flex-1">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -185,7 +194,12 @@ export const CategoriesDialog: React.FC<CategoriesDialogProps> = ({ open, onOpen
                     {editingId === cat.id ? (
                       <div className="flex items-center gap-2 min-w-0">
                         <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-48" />
-                        <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="h-9 w-9 rounded-md border border-input" />
+                        <input 
+                          type="color" 
+                          value={editColor} 
+                          onChange={(e) => setEditColor(e.target.value)} 
+                          className="h-9 w-10 rounded-md border border-input cursor-pointer" 
+                        />
                       </div>
                     ) : (
                       <div className="truncate">

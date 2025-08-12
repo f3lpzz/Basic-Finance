@@ -29,7 +29,19 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { addTransaction } = useTransactions();
-  const { categories } = useCategories();
+  const { categories, refetch: refetchCategories } = useCategories();
+
+  // Listen for category updates
+  React.useEffect(() => {
+    const handleCategoriesUpdate = () => {
+      refetchCategories();
+    };
+
+    window.addEventListener('categories:updated', handleCategoriesUpdate);
+    return () => {
+      window.removeEventListener('categories:updated', handleCategoriesUpdate);
+    };
+  }, [refetchCategories]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

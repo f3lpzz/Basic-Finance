@@ -37,9 +37,7 @@ export const Dashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Menu de Ações</CardTitle>
-              <CardDescription>
-                Adicione novas transações
-              </CardDescription>
+              <CardDescription>Ações rápidas</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

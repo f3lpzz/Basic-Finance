@@ -8,22 +8,18 @@ import { AddTransactionDialog } from './AddTransactionDialog';
 import { useState } from 'react';
 import { LogOut, Eye } from 'lucide-react';
 import { CategoriesDialog } from '@/components/categories/CategoriesDialog';
-
 export const Dashboard: React.FC = () => {
-  const { signOut } = useAuth();
+  const {
+    signOut
+  } = useAuth();
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Gestão Financeira</h1>
+          <h1 className="text-2xl font-bold">Basic Finance</h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => window.open('/transparencia', '_blank')}
-            >
+            <Button variant="outline" onClick={() => window.open('/transparencia', '_blank')}>
               <Eye className="w-4 h-4 mr-2" />
               Portal Transparência
             </Button>
@@ -47,16 +43,10 @@ export const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <Button 
-                  className="w-full" 
-                  onClick={() => setShowAddTransaction(true)}
-                >
+                <Button className="w-full" onClick={() => setShowAddTransaction(true)}>
                   Nova Transação
                 </Button>
-                <Button 
-                  className="w-full"
-                  onClick={() => setShowCategories(true)}
-                >
+                <Button className="w-full" onClick={() => setShowCategories(true)}>
                   Categorias
                 </Button>
               </div>
@@ -67,14 +57,7 @@ export const Dashboard: React.FC = () => {
         <TransactionList />
       </main>
 
-      <AddTransactionDialog 
-        open={showAddTransaction}
-        onOpenChange={setShowAddTransaction}
-      />
-      <CategoriesDialog 
-        open={showCategories}
-        onOpenChange={setShowCategories}
-      />
-    </div>
-  );
+      <AddTransactionDialog open={showAddTransaction} onOpenChange={setShowAddTransaction} />
+      <CategoriesDialog open={showCategories} onOpenChange={setShowCategories} />
+    </div>;
 };

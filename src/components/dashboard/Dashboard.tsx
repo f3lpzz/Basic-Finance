@@ -36,7 +36,7 @@ export const Dashboard: React.FC = () => {
           <BalanceCard />
           <Card>
             <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
+              <CardTitle>Menu de Ações</CardTitle>
               <CardDescription>
                 Adicione novas transações
               </CardDescription>

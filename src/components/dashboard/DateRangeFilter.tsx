@@ -34,23 +34,74 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
     if (!dateRange.from || !dateRange.to) return 'Selecionar período';
     
     const today = new Date();
+    const yesterday = subDays(today, 1);
     const from = dateRange.from;
     const to = dateRange.to;
     
+    // Normalize dates to compare only date parts (ignore time)
+    const isSameDay = (date1: Date, date2: Date) => {
+      return date1.toDateString() === date2.toDateString();
+    };
+    
     // Check predefined periods
-    if (isToday(from) && isToday(to)) {
+    if (isSameDay(from, today) && isSameDay(to, today)) {
       return 'Hoje';
     }
     
-    if (isYesterday(from) && isYesterday(to)) {
+    if (isSameDay(from, yesterday) && isSameDay(to, yesterday)) {
       return 'Ontem';
+    }
+    
+    // Check for 7 days ago (from 7 days ago to today)
+    const sevenDaysAgo = subDays(today, 7);
+    if (isSameDay(from, sevenDaysAgo) && isSameDay(to, today)) {
+      return '7 dias atrás';
+    }
+    
+    // Check for 14 days ago
+    const fourteenDaysAgo = subDays(today, 14);
+    if (isSameDay(from, fourteenDaysAgo) && isSameDay(to, today)) {
+      return '14 dias atrás';
+    }
+    
+    // Check for 30 days ago
+    const thirtyDaysAgo = subDays(today, 30);
+    if (isSameDay(from, thirtyDaysAgo) && isSameDay(to, today)) {
+      return '30 dias atrás';
     }
     
     // Check if it's current month
     const currentMonthStart = startOfMonth(today);
     const currentMonthEnd = endOfMonth(today);
-    if (from.getTime() === currentMonthStart.getTime() && to.getTime() === currentMonthEnd.getTime()) {
+    if (isSameDay(from, currentMonthStart) && isSameDay(to, currentMonthEnd)) {
       return `Este mês: ${format(from, 'd', { locale: ptBR })} a ${format(to, 'd \'de\' MMM. yyyy', { locale: ptBR })}`;
+    }
+    
+    // Check if it's last month
+    const lastMonth = subMonths(today, 1);
+    const lastMonthStart = startOfMonth(lastMonth);
+    const lastMonthEnd = endOfMonth(lastMonth);
+    if (isSameDay(from, lastMonthStart) && isSameDay(to, lastMonthEnd)) {
+      return 'Último mês';
+    }
+    
+    // Check for this week (Sunday to today)
+    const thisWeekStart = startOfWeek(today, { weekStartsOn: 0 });
+    if (isSameDay(from, thisWeekStart) && isSameDay(to, today)) {
+      return 'Esta semana (dom. até hoje)';
+    }
+    
+    // Check for last week (Sunday to Saturday)
+    const lastWeekStart = startOfWeek(subDays(today, 7), { weekStartsOn: 0 });
+    const lastWeekEnd = endOfWeek(subDays(today, 7), { weekStartsOn: 0 });
+    if (isSameDay(from, lastWeekStart) && isSameDay(to, lastWeekEnd)) {
+      return 'Semana passada (de dom. a sáb.)';
+    }
+    
+    // Check for all time (starting from 2020)
+    const allTimeStart = new Date(2020, 0, 1);
+    if (isSameDay(from, allTimeStart) && isSameDay(to, today)) {
+      return 'Todo o período';
     }
     
     // Default format for custom ranges

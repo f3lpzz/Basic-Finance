@@ -34,51 +34,55 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
     if (!dateRange.from || !dateRange.to) return 'Selecionar período';
     
     const today = new Date();
-    const yesterday = subDays(today, 1);
+    // Normalize today to start of day for consistent comparison
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    
     const from = dateRange.from;
     const to = dateRange.to;
     
     // Normalize dates to compare only date parts (ignore time)
     const isSameDay = (date1: Date, date2: Date) => {
-      return date1.toDateString() === date2.toDateString();
+      return date1.getTime() === date2.getTime();
     };
     
     // Check predefined periods
-    if (isSameDay(from, today) && isSameDay(to, today)) {
+    if (isSameDay(from, todayStart) && isSameDay(to, todayStart)) {
       return 'Hoje';
     }
     
-    if (isSameDay(from, yesterday) && isSameDay(to, yesterday)) {
+    if (isSameDay(from, yesterdayStart) && isSameDay(to, yesterdayStart)) {
       return 'Ontem';
     }
     
     // Check for 7 days ago (from 7 days ago to today)
-    const sevenDaysAgo = subDays(today, 7);
-    if (isSameDay(from, sevenDaysAgo) && isSameDay(to, today)) {
+    const sevenDaysAgo = subDays(todayStart, 7);
+    if (isSameDay(from, sevenDaysAgo) && isSameDay(to, todayStart)) {
       return '7 dias atrás';
     }
     
     // Check for 14 days ago
-    const fourteenDaysAgo = subDays(today, 14);
-    if (isSameDay(from, fourteenDaysAgo) && isSameDay(to, today)) {
+    const fourteenDaysAgo = subDays(todayStart, 14);
+    if (isSameDay(from, fourteenDaysAgo) && isSameDay(to, todayStart)) {
       return '14 dias atrás';
     }
     
     // Check for 30 days ago
-    const thirtyDaysAgo = subDays(today, 30);
-    if (isSameDay(from, thirtyDaysAgo) && isSameDay(to, today)) {
+    const thirtyDaysAgo = subDays(todayStart, 30);
+    if (isSameDay(from, thirtyDaysAgo) && isSameDay(to, todayStart)) {
       return '30 dias atrás';
     }
     
     // Check if it's current month
-    const currentMonthStart = startOfMonth(today);
-    const currentMonthEnd = endOfMonth(today);
+    const currentMonthStart = startOfMonth(todayStart);
+    const currentMonthEnd = endOfMonth(todayStart);
     if (isSameDay(from, currentMonthStart) && isSameDay(to, currentMonthEnd)) {
-      return `Este mês: ${format(from, 'd', { locale: ptBR })} a ${format(to, 'd \'de\' MMM. yyyy', { locale: ptBR })}`;
+      return 'Este mês';
     }
     
     // Check if it's last month
-    const lastMonth = subMonths(today, 1);
+    const lastMonth = subMonths(todayStart, 1);
     const lastMonthStart = startOfMonth(lastMonth);
     const lastMonthEnd = endOfMonth(lastMonth);
     if (isSameDay(from, lastMonthStart) && isSameDay(to, lastMonthEnd)) {
@@ -86,21 +90,21 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
     }
     
     // Check for this week (Sunday to today)
-    const thisWeekStart = startOfWeek(today, { weekStartsOn: 0 });
-    if (isSameDay(from, thisWeekStart) && isSameDay(to, today)) {
+    const thisWeekStart = startOfWeek(todayStart, { weekStartsOn: 0 });
+    if (isSameDay(from, thisWeekStart) && isSameDay(to, todayStart)) {
       return 'Esta semana (dom. até hoje)';
     }
     
     // Check for last week (Sunday to Saturday)
-    const lastWeekStart = startOfWeek(subDays(today, 7), { weekStartsOn: 0 });
-    const lastWeekEnd = endOfWeek(subDays(today, 7), { weekStartsOn: 0 });
+    const lastWeekStart = startOfWeek(subDays(todayStart, 7), { weekStartsOn: 0 });
+    const lastWeekEnd = endOfWeek(subDays(todayStart, 7), { weekStartsOn: 0 });
     if (isSameDay(from, lastWeekStart) && isSameDay(to, lastWeekEnd)) {
       return 'Semana passada (de dom. a sáb.)';
     }
     
     // Check for all time (starting from 2020)
     const allTimeStart = new Date(2020, 0, 1);
-    if (isSameDay(from, allTimeStart) && isSameDay(to, today)) {
+    if (isSameDay(from, allTimeStart) && isSameDay(to, todayStart)) {
       return 'Todo o período';
     }
     

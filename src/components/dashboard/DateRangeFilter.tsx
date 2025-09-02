@@ -171,12 +171,20 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
     
     setDateRange(newRange);
     onDateRangeChange(newRange);
+    setOpen(false); // Close the sheet after selection
   };
 
   const handleCalendarSelect = (range: DateRange | undefined) => {
     if (range) {
       setDateRange(range);
-      onDateRangeChange(range);
+      // Don't call onDateRangeChange here - wait for user to click Apply
+    }
+  };
+
+  const handleApplyCustomRange = () => {
+    if (dateRange.from && dateRange.to) {
+      onDateRangeChange(dateRange);
+      setOpen(false);
     }
   };
 
@@ -305,6 +313,17 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
                   />
                 </div>
               </div>
+            </div>
+            
+            {/* Apply button for custom date range */}
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleApplyCustomRange}
+                disabled={!dateRange.from || !dateRange.to}
+                className="w-full"
+              >
+                Aplicar período personalizado
+              </Button>
             </div>
           </div>
         </div>

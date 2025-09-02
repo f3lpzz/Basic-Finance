@@ -110,47 +110,50 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
 
   const handlePredefinedPeriod = (period: string) => {
     const today = new Date();
+    // Normalize today to start of day for consistent comparison
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     let newRange: DateRange = { from: undefined, to: undefined };
 
     switch (period) {
       case 'today':
-        newRange = { from: today, to: today };
+        newRange = { from: todayStart, to: todayStart };
         break;
       case 'yesterday':
-        const yesterday = subDays(today, 1);
+        const yesterday = subDays(todayStart, 1);
         newRange = { from: yesterday, to: yesterday };
         break;
       case 'thisWeek':
-        newRange = { from: startOfWeek(today, { weekStartsOn: 0 }), to: today };
+        newRange = { from: startOfWeek(todayStart, { weekStartsOn: 0 }), to: todayStart };
         break;
       case 'last7Days':
-        newRange = { from: subDays(today, 7), to: today };
+        newRange = { from: subDays(todayStart, 7), to: todayStart };
         break;
       case 'lastWeek':
-        const lastWeekStart = startOfWeek(subDays(today, 7), { weekStartsOn: 0 });
-        const lastWeekEnd = endOfWeek(subDays(today, 7), { weekStartsOn: 0 });
+        const lastWeekStart = startOfWeek(subDays(todayStart, 7), { weekStartsOn: 0 });
+        const lastWeekEnd = endOfWeek(subDays(todayStart, 7), { weekStartsOn: 0 });
         newRange = { from: lastWeekStart, to: lastWeekEnd };
         break;
       case 'last14Days':
-        newRange = { from: subDays(today, 14), to: today };
+        newRange = { from: subDays(todayStart, 14), to: todayStart };
         break;
       case 'thisMonth':
-        newRange = { from: startOfMonth(today), to: endOfMonth(today) };
+        newRange = { from: startOfMonth(todayStart), to: endOfMonth(todayStart) };
         break;
       case 'last30Days':
-        newRange = { from: subDays(today, 30), to: today };
+        newRange = { from: subDays(todayStart, 30), to: todayStart };
         break;
       case 'lastMonth':
-        const lastMonth = subMonths(today, 1);
+        const lastMonth = subMonths(todayStart, 1);
         newRange = { from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) };
         break;
       case 'allTime':
-        newRange = { from: new Date(2020, 0, 1), to: today };
+        newRange = { from: new Date(2020, 0, 1), to: todayStart };
         break;
     }
 
     setDateRange(newRange);
     onDateRangeChange(newRange);
+    setOpen(false); // Close the sheet after selection
   };
 
   const handleCustomDays = (type: 'today' | 'yesterday') => {

@@ -17,21 +17,24 @@ interface DateRange {
 }
 
 interface DateRangeFilterProps {
+  value: DateRange;
   onDateRangeChange: (range: DateRange) => void;
 }
 
-export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeChange }) => {
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  });
+export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ value, onDateRangeChange }) => {
+  const [dateRange, setDateRange] = useState<DateRange>(value);
   const [customDaysToday, setCustomDaysToday] = useState('30');
   const [customDaysYesterday, setCustomDaysYesterday] = useState('30');
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  // Update internal state when value prop changes
+  React.useEffect(() => {
+    setDateRange(value);
+  }, [value]);
+
   const getDisplayText = () => {
-    if (!dateRange.from || !dateRange.to) return 'Selecionar período';
+    if (!value.from || !value.to) return 'Selecionar período';
     
     const today = new Date();
     // Normalize today to start of day for consistent comparison
@@ -39,8 +42,8 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onDateRangeCha
     const yesterdayStart = new Date(todayStart);
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
     
-    const from = dateRange.from;
-    const to = dateRange.to;
+    const from = value.from;
+    const to = value.to;
     
     // Normalize dates to compare only date parts (ignore time)
     const isSameDay = (date1: Date, date2: Date) => {

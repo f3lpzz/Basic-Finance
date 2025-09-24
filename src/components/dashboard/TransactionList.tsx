@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { startOfMonth, endOfMonth, subDays, subMonths } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,10 @@ interface DateRange {
 }
 
 export const TransactionList: React.FC = () => {
-  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [dateRange, setDateRange] = useState<DateRange>({ 
+    from: startOfMonth(new Date()), 
+    to: endOfMonth(new Date()) 
+  });
   const { transactions, loading, deleteTransaction } = useTransactions(dateRange);
   const { toast } = useToast();
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -74,7 +78,7 @@ export const TransactionList: React.FC = () => {
                 Histórico das movimentações financeiras
               </CardDescription>
             </div>
-            <DateRangeFilter onDateRangeChange={setDateRange} />
+            <DateRangeFilter value={dateRange} onDateRangeChange={setDateRange} />
           </div>
         </CardHeader>
       <CardContent>

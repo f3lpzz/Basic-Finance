@@ -25,7 +25,6 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ value, onDateR
   const [dateRange, setDateRange] = useState<DateRange>(value);
   const [customDaysToday, setCustomDaysToday] = useState('30');
   const [customDaysYesterday, setCustomDaysYesterday] = useState('30');
-  const [compareEnabled, setCompareEnabled] = useState(false);
   const [open, setOpen] = useState(false);
 
   // Update internal state when value prop changes
@@ -275,47 +274,23 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ value, onDateR
 
           <Separator />
 
-          {/* Compare toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="compare">Comparar</Label>
-            <Switch
-              id="compare"
-              checked={compareEnabled}
-              onCheckedChange={setCompareEnabled}
-            />
-          </div>
-
-          <Separator />
-
           {/* Calendar */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Selecionar período</h4>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs">Data de início</Label>
-                <div className="border rounded-md p-1">
-                  <Calendar
-                    mode="single"
-                    selected={dateRange.from}
-                    onSelect={(date) => handleCalendarSelect({ from: date, to: dateRange.to })}
-                    locale={ptBR}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-xs">Data de término</Label>
-                <div className="border rounded-md p-1">
-                  <Calendar
-                    mode="single"
-                    selected={dateRange.to}
-                    onSelect={(date) => handleCalendarSelect({ from: dateRange.from, to: date })}
-                    locale={ptBR}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </div>
-              </div>
+            <div className="border rounded-md p-1">
+              <Calendar
+                mode="range"
+                selected={{ from: dateRange.from, to: dateRange.to }}
+                onSelect={handleCalendarSelect}
+                locale={ptBR}
+                className={cn("p-3 pointer-events-auto")}
+                classNames={{
+                  day_range_start: "bg-primary text-primary-foreground rounded-full",
+                  day_range_end: "bg-primary text-primary-foreground rounded-full", 
+                  day_range_middle: "bg-primary/20 text-foreground rounded-none",
+                  day_selected: "bg-primary text-primary-foreground rounded-full"
+                }}
+              />
             </div>
             
             {/* Apply button for custom date range */}
